@@ -1,17 +1,12 @@
 using AspNetCoreHero.ToastNotification;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
-using System.Threading.Tasks;
 using WebCuoiKy.Models;
 
 namespace WebCuoiKy
@@ -33,7 +28,7 @@ namespace WebCuoiKy
             services.AddDbContext<dbMarketsContext>(options => options.UseSqlServer(connectString));
 
             services.AddSingleton<HtmlEncoder>(HtmlEncoder.Create(allowedRanges: new[] { UnicodeRanges.All }));
-             
+
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
 

@@ -1,5 +1,3 @@
-using System;
-
 namespace WebCuoiKy.Models
 {
     public class ErrorViewModel
