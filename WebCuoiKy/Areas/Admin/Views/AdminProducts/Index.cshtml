@@ -19,13 +19,7 @@
         <div class="row m-b-30">
             <div class="col-md-8">
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="input-affix m-v-10">
-                            <i class="prefix-icon anticon anticon-search opacity-04"></i>
-                            <input id="keyword" name="keyword" type="text" class="form-control" placeholder="Tìm kiếm sản phẩm">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="input-affix m-v-10">
                             <select class="custom-select" id="txtCatID" name="txtCatID" style="min-width: 200px;" asp-items="ViewBag.DanhMuc">
                                 <option selected>Chọn danh mục</option>
@@ -75,17 +69,17 @@
                                 <td>
                                     @if (item.UnitsInStock.Value > 0)
                                     {
-                                <div class="d-flex align-items-center">
-                                    <div class="badge badge-success badge-dot m-r-10"></div>
-                                    <div>Còn hàng</div>
-                                </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="badge badge-success badge-dot m-r-10"></div>
+                                            <div>Còn hàng</div>
+                                        </div>
                                     }
                                     else
                                     {
-                                <div class="d-flex align-items-center">
-                                    <div class="badge badge-success badge-dot m-r-10"></div>
-                                    <div>Hết hàng</div>
-                                </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="badge badge-danger badge-dot m-r-10"></div>
+                                            <div>Hết hàng</div>
+                                        </div>
                                     }
 
                                 <td>
@@ -103,7 +97,7 @@
             </table>
             <div aria-label="Page navigation example">
                 <ul class="pagination">
-                    <pager class="pager-container" list="@Model" asp-area="Admin" asp-controller="AdminProducts" asp-route-CatID="@ViewBag.CurrentCateID" asp-action="Index"/>
+                    <pager class="pager-container" list="@Model" asp-area="Admin" asp-controller="AdminProducts" asp-route-CatID="@ViewBag.CurrentCateID" asp-action="Index" />
                 </ul>
             </div>
         </div>
