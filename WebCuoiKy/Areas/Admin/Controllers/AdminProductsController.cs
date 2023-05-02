@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using AspNetCoreHero.ToastNotification.Notyf;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PagedList.Core;
@@ -16,10 +18,11 @@ namespace WebCuoiKy.Areas.Admin.Controllers
     public class AdminProductsController : Controller
     {
         private readonly dbMarketsContext _context;
-
-        public AdminProductsController(dbMarketsContext context)
+        public INotyfService _notyfService { get; }
+        public AdminProductsController(dbMarketsContext context, INotyfService notyfService)
         {
             _context = context;
+            _notyfService = notyfService;
         }
 
         // GET: Admin/AdminProducts
@@ -114,6 +117,7 @@ namespace WebCuoiKy.Areas.Admin.Controllers
                 product.DateCreated = DateTime.Now;
                 _context.Add(product);
                 await _context.SaveChangesAsync();
+                _notyfService.Success("Thêm sản phẩm mới thành công");
                 return RedirectToAction(nameof(Index));
             }
             ViewData["DanhMuc"] = new SelectList(_context.Categories, "CatId", "CatName", product.CatId);
@@ -133,7 +137,7 @@ namespace WebCuoiKy.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            ViewData["CatId"] = new SelectList(_context.Categories, "CatId", "CatId", product.CatId);
+            ViewData["DanhMuc"] = new SelectList(_context.Categories, "CatId", "CatName", product.CatId);
             return View(product);
         }
 
@@ -165,6 +169,7 @@ namespace WebCuoiKy.Areas.Admin.Controllers
                     product.DateModified = DateTime.Now;
 
                     _context.Update(product);
+                    _notyfService.Success("Sửa sản phẩm thành công");
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -180,7 +185,7 @@ namespace WebCuoiKy.Areas.Admin.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CatId"] = new SelectList(_context.Categories, "CatId", "CatId", product.CatId);
+            ViewData["DanhMuc"] = new SelectList(_context.Categories, "CatId", "CatName", product.CatId);
             return View(product);
         }
 
@@ -211,6 +216,7 @@ namespace WebCuoiKy.Areas.Admin.Controllers
             var product = await _context.Products.FindAsync(id);
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
+            _notyfService.Success("Xóa sản phẩm thành công");
             return RedirectToAction(nameof(Index));
         }
 

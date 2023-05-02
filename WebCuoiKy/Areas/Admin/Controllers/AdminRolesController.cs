@@ -61,7 +61,7 @@ namespace WebCuoiKy.Areas.Admin.Controllers
             {
                 _context.Add(role);
                 await _context.SaveChangesAsync();
-                _notyfService.Success("Tạo mới thành công");
+                _notyfService.Success("Tạo mới quyền truy cập thành công thành công");
                 return RedirectToAction(nameof(Index));
             }
             return View(role);
