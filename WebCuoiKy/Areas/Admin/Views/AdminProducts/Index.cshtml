@@ -10,6 +10,7 @@
     <div class="header-sub-title">
         <nav class="breadcrumb breadcrumb-dash">
             <a asp-area="Admin" asp-controller="Home" asp-action="Index" class="breadcrumb-item"><i class="anticon anticon-home m-r-5"></i>Trang chủ</a>
+            <a asp-area="Admin" asp-controller="AdminProducts" asp-action="Index" class="breadcrumb-item"><i class="anticon anticon-home m-r-5"></i>Danh sách sản phẩm</a>
             <span class="breadcrumb-item active">Danh sách sản phẩm : trang @CurrentPage</span>
         </nav>
     </div>
@@ -19,6 +20,12 @@
         <div class="row m-b-30">
             <div class="col-md-8">
                 <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-affix m-v-10">
+                            <i class="prefix-icon anticon anticon-search"></i>
+                            <input id="keyword" name="keyword" type="text" class="form-control" placeholder="Tìm kiếm sản phẩm">
+                        </div>
+                    </div>
                     <div class="col-md-4">
                         <div class="input-affix m-v-10">
                             <select class="custom-select" id="txtCatID" name="txtCatID" style="min-width: 200px;" asp-items="ViewBag.DanhMuc">
@@ -91,8 +98,6 @@
                             </tr>
                         }
                     }
-
-
                 </tbody>
             </table>
             <div aria-label="Page navigation example">
@@ -146,6 +151,7 @@
                     },
                     error: function (xhr) {
                         alert('error');
+                        console.log(xhr);
                     }
                 });
             });
