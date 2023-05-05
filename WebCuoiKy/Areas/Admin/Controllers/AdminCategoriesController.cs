@@ -1,53 +1,45 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PagedList.Core;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using PagedList.Core;
 using WebCuoiKy.Helper;
 using WebCuoiKy.Models;
 
 namespace WebCuoiKy.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class AdminTinDangsController : Controller
+    public class AdminCategoriesController : Controller
     {
         private readonly dbMarketsContext _context;
         public INotyfService _notyfService { get; }
-        public AdminTinDangsController(dbMarketsContext context, INotyfService notyfService)
+
+        public AdminCategoriesController(dbMarketsContext context, INotyfService notyfService)
         {
             _context = context;
             _notyfService = notyfService;
         }
 
-        // GET: Admin/AdminTinDangs
+        // GET: Admin/AdminCategories
         public IActionResult Index(int? page)
         {
-            var collection = _context.TinDangs.AsNoTracking().ToList();
-            foreach (var item in collection)
-            {
-                if (item.CreatedDate == null)
-                {
-                    item.CreatedDate = DateTime.Now;
-                    _context.Update(item);
-                    _context.SaveChanges();
-                }
-            }
-
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            var pageSize = 10;
-            var lsTinDangs = _context.TinDangs
+            var pageSize = 20;
+            var lsCategorys = _context.Categories
                 .AsNoTracking()
-                .OrderBy(x => x.PostId);
-            PagedList<TinDang> models = new PagedList<TinDang>(lsTinDangs, pageNumber, pageSize);
+                .OrderBy(x => x.CatId);
+            PagedList<Category> models = new PagedList<Category>(lsCategorys, pageNumber, pageSize);
 
             ViewBag.CurrentPage = pageNumber;
             return View(models);
         }
 
-        // GET: Admin/AdminTinDangs/Details/5
+        // GET: Admin/AdminCategories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -55,28 +47,28 @@ namespace WebCuoiKy.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var tinDang = await _context.TinDangs
-                .FirstOrDefaultAsync(m => m.PostId == id);
-            if (tinDang == null)
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(m => m.CatId == id);
+            if (category == null)
             {
                 return NotFound();
             }
 
-            return View(tinDang);
+            return View(category);
         }
 
-        // GET: Admin/AdminTinDangs/Create
+        // GET: Admin/AdminCategories/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Admin/AdminTinDangs/Create
+        // POST: Admin/AdminCategories/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PostId,Title,Scontents,Contents,Thumb,Published,Alias,CreatedDate,Author,AccountId,Tags,CatId,IsHot,IsNewfeed,MetaKey,MetaDesc,Views")] TinDang tinDang, Microsoft.AspNetCore.Http.IFormFile fThumb)
+        public async Task<IActionResult> Create([Bind("CatId,CatName,Description,ParentId,Levels,Ordering,Published,Thumb,Title,Alias,MetaDesc,MetaKey,Cover,SchemaMarkup")] Category category, Microsoft.AspNetCore.Http.IFormFile fThumb)
         {
             if (ModelState.IsValid)
             {
@@ -84,23 +76,20 @@ namespace WebCuoiKy.Areas.Admin.Controllers
                 if (fThumb != null)
                 {
                     string extension = Path.GetExtension(fThumb.FileName);
-                    string imageName = Utilities.SEOUrl(tinDang.Title) + extension;
-                    tinDang.Thumb = await Utilities.UploadFile(fThumb, @"news", imageName.ToLower());
+                    string imageName = Utilities.SEOUrl(category.CatName) + extension;
+                    category.Thumb = await Utilities.UploadFile(fThumb, @"category", imageName.ToLower());
                 }
-                if (string.IsNullOrEmpty(tinDang.Thumb)) tinDang.Thumb = "default.jpg";
-                tinDang.Alias = Utilities.SEOUrl(tinDang.Title);
-                tinDang.CreatedDate = DateTime.Now;
-
-
-                _context.Add(tinDang);
+                if (string.IsNullOrEmpty(category.Thumb)) category.Thumb = "default.jpg";
+                category.Alias = Utilities.SEOUrl(category.CatName);
+                _context.Add(category);
                 await _context.SaveChangesAsync();
                 _notyfService.Success("Thêm mới thành công");
                 return RedirectToAction(nameof(Index));
             }
-            return View(tinDang);
+            return View(category);
         }
 
-        // GET: Admin/AdminTinDangs/Edit/5
+        // GET: Admin/AdminCategories/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -108,22 +97,22 @@ namespace WebCuoiKy.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var tinDang = await _context.TinDangs.FindAsync(id);
-            if (tinDang == null)
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null)
             {
                 return NotFound();
             }
-            return View(tinDang);
+            return View(category);
         }
 
-        // POST: Admin/AdminTinDangs/Edit/5
+        // POST: Admin/AdminCategories/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PostId,Title,Scontents,Contents,Thumb,Published,Alias,CreatedDate,Author,AccountId,Tags,CatId,IsHot,IsNewfeed,MetaKey,MetaDesc,Views")] TinDang tinDang, Microsoft.AspNetCore.Http.IFormFile fThumb)
+        public async Task<IActionResult> Edit(int id, [Bind("CatId,CatName,Description,ParentId,Levels,Ordering,Published,Thumb,Title,Alias,MetaDesc,MetaKey,Cover,SchemaMarkup")] Category category, Microsoft.AspNetCore.Http.IFormFile fThumb)
         {
-            if (id != tinDang.PostId)
+            if (id != category.CatId)
             {
                 return NotFound();
             }
@@ -132,23 +121,20 @@ namespace WebCuoiKy.Areas.Admin.Controllers
             {
                 try
                 {
-                    //Xu ly Thumb
                     if (fThumb != null)
                     {
                         string extension = Path.GetExtension(fThumb.FileName);
-                        string imageName = Utilities.SEOUrl(tinDang.Title) + extension;
-                        tinDang.Thumb = await Utilities.UploadFile(fThumb, @"news", imageName.ToLower());
+                        string imageName = Utilities.SEOUrl(category.CatName) + extension;
+                        category.Thumb = await Utilities.UploadFile(fThumb, @"category", imageName.ToLower());
                     }
-                    if (string.IsNullOrEmpty(tinDang.Thumb)) tinDang.Thumb = "default.jpg";
-                    tinDang.Alias = Utilities.SEOUrl(tinDang.Title);
-
-                    _context.Update(tinDang);
+                    if (string.IsNullOrEmpty(category.Thumb)) category.Thumb = "default.jpg";
+                    _context.Update(category);
                     await _context.SaveChangesAsync();
                     _notyfService.Success("Chỉnh sửa thành công");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TinDangExists(tinDang.PostId))
+                    if (!CategoryExists(category.CatId))
                     {
                         return NotFound();
                     }
@@ -159,10 +145,9 @@ namespace WebCuoiKy.Areas.Admin.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(tinDang);
+            return View(category);
         }
-
-        // GET: Admin/AdminTinDangs/Delete/5
+        // GET: Admin/AdminCategories/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -170,31 +155,31 @@ namespace WebCuoiKy.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var tinDang = await _context.TinDangs
-                .FirstOrDefaultAsync(m => m.PostId == id);
-            if (tinDang == null)
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(m => m.CatId == id);
+            if (category == null)
             {
                 return NotFound();
             }
 
-            return View(tinDang);
+            return View(category);
         }
 
-        // POST: Admin/AdminTinDangs/Delete/5
+        // POST: Admin/AdminCategories/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var tinDang = await _context.TinDangs.FindAsync(id);
-            _context.TinDangs.Remove(tinDang);
+            var category = await _context.Categories.FindAsync(id);
+            _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
             _notyfService.Success("Xóa thành công");
             return RedirectToAction(nameof(Index));
         }
 
-        private bool TinDangExists(int id)
+        private bool CategoryExists(int id)
         {
-            return _context.TinDangs.Any(e => e.PostId == id);
+            return _context.Categories.Any(e => e.CatId == id);
         }
     }
 }

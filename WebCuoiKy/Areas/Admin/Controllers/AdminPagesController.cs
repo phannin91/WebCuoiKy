@@ -1,20 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PagedList.Core;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using WebCuoiKy.Helper;
 using WebCuoiKy.Models;
 
 namespace WebCuoiKy.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    
     public class AdminPagesController : Controller
     {
         private readonly dbMarketsContext _context;
+        public INotyfService _notyfService { get; }
 
-        public AdminPagesController(dbMarketsContext context)
+        public AdminPagesController(dbMarketsContext context, INotyfService notyfService)
         {
             _context = context;
+            _notyfService = notyfService;
+
         }
 
         // GET: Admin/AdminPages
@@ -61,12 +69,22 @@ namespace WebCuoiKy.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PageId,PageName,Contents,Thumb,Published,Title,MetaDesc,MetaKey,Alias,CreatedDate,Ordering")] Page page)
+        public async Task<IActionResult> Create([Bind("PageId,PageName,Contents,Thumb,Published,Title,MetaDesc,MetaKey,Alias,CreatedDate,Ordering")] Page page, Microsoft.AspNetCore.Http.IFormFile fThumb)
         {
             if (ModelState.IsValid)
             {
+
+                if (fThumb != null)
+                {
+                    string extension = Path.GetExtension(fThumb.FileName);
+                    string imageName = Utilities.SEOUrl(page.PageName) + extension;
+                    page.Thumb = await Utilities.UploadFile(fThumb, @"pages", imageName.ToLower());
+                }
+                if (string.IsNullOrEmpty(page.Thumb)) page.Thumb = "default.jpg";
+                page.Alias = Utilities.SEOUrl(page.PageName);
                 _context.Add(page);
                 await _context.SaveChangesAsync();
+                _notyfService.Success("Thêm mới thành công");
                 return RedirectToAction(nameof(Index));
             }
             return View(page);
@@ -93,7 +111,7 @@ namespace WebCuoiKy.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PageId,PageName,Contents,Thumb,Published,Title,MetaDesc,MetaKey,Alias,CreatedDate,Ordering")] Page page)
+        public async Task<IActionResult> Edit(int id, [Bind("PageId,PageName,Contents,Thumb,Published,Title,MetaDesc,MetaKey,Alias,CreatedDate,Ordering")] Page page, Microsoft.AspNetCore.Http.IFormFile fThumb)
         {
             if (id != page.PageId)
             {
@@ -104,8 +122,17 @@ namespace WebCuoiKy.Areas.Admin.Controllers
             {
                 try
                 {
+                    if (fThumb != null)
+                    {
+                        string extension = Path.GetExtension(fThumb.FileName);
+                        string imageName = Utilities.SEOUrl(page.PageName) + extension;
+                        page.Thumb = await Utilities.UploadFile(fThumb, @"pages", imageName.ToLower());
+                    }
+                    if (string.IsNullOrEmpty(page.Thumb)) page.Thumb = "default.jpg";
+                    page.Alias = Utilities.SEOUrl(page.PageName);
                     _context.Update(page);
                     await _context.SaveChangesAsync();
+                    _notyfService.Success("Cập nhật thành công");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -149,6 +176,7 @@ namespace WebCuoiKy.Areas.Admin.Controllers
             var page = await _context.Pages.FindAsync(id);
             _context.Pages.Remove(page);
             await _context.SaveChangesAsync();
+            _notyfService.Success("Xóa thành công");
             return RedirectToAction(nameof(Index));
         }
 
@@ -158,3 +186,4 @@ namespace WebCuoiKy.Areas.Admin.Controllers
         }
     }
 }
+
