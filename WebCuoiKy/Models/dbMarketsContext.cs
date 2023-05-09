@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WebCuoiKy.ModelViews;
 
 #nullable disable
 
@@ -369,5 +370,9 @@ namespace WebCuoiKy.Models
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+        public DbSet<WebCuoiKy.ModelViews.RegisterViewModel> RegisterViewModel { get; set; }
+
+        public DbSet<WebCuoiKy.ModelViews.LoginViewModel> LoginViewModel { get; set; }
     }
 }

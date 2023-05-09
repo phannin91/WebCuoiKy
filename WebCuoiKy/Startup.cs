@@ -1,6 +1,8 @@
 using AspNetCoreHero.ToastNotification;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,8 +30,13 @@ namespace WebCuoiKy
             services.AddDbContext<dbMarketsContext>(options => options.UseSqlServer(connectString));
 
             services.AddSingleton<HtmlEncoder>(HtmlEncoder.Create(allowedRanges: new[] { UnicodeRanges.All }));
-
-
+            services.AddSession();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(p =>
+                {
+                    p.LoginPath = "/dang-nhap.html";
+                    p.AccessDeniedPath = "/";
+                });
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
             services.AddNotyf(config =>
@@ -55,9 +62,10 @@ namespace WebCuoiKy
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.UseSession();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
